@@ -8,15 +8,27 @@ const savedjobsSlice = createSlice({
     name: 'savedJobs',
     initialState,
     reducers: {
-        saveJob: () => {
-
+        // Save a job (prevents duplicates by job.id)
+        saveJob: (state, action) => {
+            const job = action.payload;
+            const exists = state.savedJobs.some((j) => j.id === job.id);
+            if (!exists) {
+                state.savedJobs.push(job);
+            }
         },
-        removeJob: () => {
-
+        // Remove a job by its id
+        removeJob: (state, action) => {
+            const jobId = action.payload;
+            state.savedJobs = state.savedJobs.filter((j) => j.id !== jobId);
         },
-        clearSavedJobs: () => { },
+        // Clear all saved jobs
+        clearSavedJobs: (state) => {
+            state.savedJobs = [];
+        },
 
     }
 })
 
+export const { saveJob, removeJob, clearSavedJobs } = savedJobsSlice.actions;
 
+export default savedJobsSlice.reducer;
