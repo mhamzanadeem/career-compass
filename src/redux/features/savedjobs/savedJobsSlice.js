@@ -1,10 +1,10 @@
-import { createSlice, nanoid } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     savedJobs: []
 }
 
-const savedjobsSlice = createSlice({
+const savedJobsSlice = createSlice({
     name: 'savedJobs',
     initialState,
     reducers: {
