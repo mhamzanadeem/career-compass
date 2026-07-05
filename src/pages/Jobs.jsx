@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { LuSlidersHorizontal, LuSearchX, LuTriangleAlert } from "react-icons/lu";
 import { AnimatePresence, motion } from "framer-motion";
@@ -6,24 +6,89 @@ import FilterPanel from "../components/FilterPanel";
 import JobCard from "../components/JobCard";
 import Pagination from "../components/Pagination";
 import { JobGridSkeleton } from "../components/Loader";
-import { searchJobs, setCurrentPage } from "../redux/features/jobs/jobSlice";
+import { setCurrentPage } from "../redux/features/jobs/jobSlice";
+
+function normalizeText(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function matchesText(value, query) {
+  const normalizedQuery = normalizeText(query);
+  if (!normalizedQuery) return true;
+  return normalizeText(value).includes(normalizedQuery);
+}
+
+function parseSalary(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function matchesSalary(job, min, max) {
+  const filterMin = parseSalary(min);
+  const filterMax = parseSalary(max);
+  if (filterMin === null && filterMax === null) return true;
+
+  const jobMin = parseSalary(job.salary_min);
+  const jobMax = parseSalary(job.salary_max);
+
+  if (filterMin !== null) {
+    if (jobMax !== null && jobMax < filterMin) return false;
+    if (jobMin !== null && jobMin < filterMin && jobMax === null) return false;
+  }
+
+  if (filterMax !== null) {
+    if (jobMin !== null && jobMin > filterMax) return false;
+    if (jobMax !== null && jobMax > filterMax && jobMin === null) return false;
+  }
+
+  return true;
+}
 
 export default function Jobs() {
   const dispatch = useDispatch();
   const [showFilters, setShowFilters] = useState(false);
-  const { jobs, loading, error, params, totalPages, totalJobs } = useSelector(
-    (s) => s.jobs
-  );
+  const { jobs, loading, error, params } = useSelector((s) => s.jobs);
+
+  const filteredJobs = useMemo(() => {
+    return jobs.filter((job) => {
+      if (!matchesText(job.location, params.location)) return false;
+      if (!matchesText(job.remote_type, params.remote_type)) return false;
+      if (!matchesText(job.employment_type, params.employment_type)) return false;
+      if (!matchesText(job.seniority || job.level || job.experience_level, params.seniority)) return false;
+      if (!matchesSalary(job, params.salary_min, params.salary_max)) return false;
+      return true;
+    });
+  }, [
+    jobs,
+    params.location,
+    params.remote_type,
+    params.employment_type,
+    params.seniority,
+    params.salary_min,
+    params.salary_max,
+  ]);
+
+  const pageSize = Number(params.per_page) || 20;
+  const totalPages = filteredJobs.length > 0 ? Math.ceil(filteredJobs.length / pageSize) : 0;
+  const currentPage = totalPages > 0 ? Math.min(params.page, totalPages) : 1;
+  const startIndex = (currentPage - 1) * pageSize;
+  const visibleJobs = filteredJobs.slice(startIndex, startIndex + pageSize);
 
   useEffect(() => {
-    dispatch(searchJobs());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    globalThis.console.info("[Job Search] Frontend is rendering results from Redux store", {
+      loading,
+      error,
+      storedJobs: jobs.length,
+      filteredJobs: filteredJobs.length,
+      visibleJobs: visibleJobs.length,
+      currentPage,
+    });
+  }, [loading, error, jobs.length, filteredJobs.length, visibleJobs.length, currentPage]);
 
   const handlePageChange = (page) => {
+    globalThis.console.info("[Job Search] User changed page", { page });
     dispatch(setCurrentPage(page));
-    dispatch(searchJobs());
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    globalThis.window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -32,7 +97,7 @@ export default function Jobs() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Browse Jobs</h1>
           <p className="text-muted text-sm mt-1">
-            {loading ? "Searching…" : `${totalJobs.toLocaleString()} roles match your search`}
+            {loading ? "Searching…" : `${filteredJobs.length.toLocaleString()} roles match your filters`}
           </p>
         </div>
         <button
@@ -79,34 +144,31 @@ export default function Jobs() {
               <LuTriangleAlert className="text-danger" size={32} />
               <p className="font-semibold">We couldn't load jobs right now</p>
               <p className="text-sm text-muted max-w-sm">{error}</p>
-              <button
-                onClick={() => dispatch(searchJobs())}
-                className="btn-gradient rounded-lg px-5 py-2 text-sm mt-2"
-              >
-                Try again
-              </button>
-            </div>
-          )}
-
-          {!loading && !error && jobs.length === 0 && (
-            <div className="card-surface flex flex-col items-center gap-3 py-16 text-center px-6">
-              <LuSearchX className="text-muted" size={32} />
-              <p className="font-semibold">No jobs match your filters</p>
-              <p className="text-sm text-muted max-w-sm">
-                Try widening your search or clearing a few filters.
+              <p className="text-sm text-muted">
+                Use the search box again to fetch a fresh set of results.
               </p>
             </div>
           )}
 
-          {!loading && !error && jobs.length > 0 && (
+          {!loading && !error && filteredJobs.length === 0 && (
+            <div className="card-surface flex flex-col items-center gap-3 py-16 text-center px-6">
+              <LuSearchX className="text-muted" size={32} />
+              <p className="font-semibold">No jobs match your current view</p>
+              <p className="text-sm text-muted max-w-sm">
+                Try searching first or clearing a few filters.
+              </p>
+            </div>
+          )}
+
+          {!loading && !error && visibleJobs.length > 0 && (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                {jobs.map((job) => (
+                {visibleJobs.map((job) => (
                   <JobCard key={job.id} job={job} />
                 ))}
               </div>
               <Pagination
-                currentPage={params.page}
+                currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={handlePageChange}
               />

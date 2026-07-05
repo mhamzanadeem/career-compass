@@ -1,4 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { API_BASE_URL, API_KEY } from '../../../utils/constants';
+
+const debugJobSearch = (step, details) => {
+    globalThis.console.info(`[Job Search] ${step}`, details || "");
+};
 
 
 // ---------- Initial Search Parameters ----------
@@ -56,7 +61,7 @@ const jobsSlice = createSlice({
         },
         // Clear the job list (e.g., before a new search)
         clearJobs: (state) => {
-            state.items = [];
+            state.jobs = [];
             state.totalJobs = 0;
             state.totalPages = 0;
         },
@@ -68,19 +73,20 @@ const jobsSlice = createSlice({
                 state.error = null;
             })
             .addCase(searchJobs.fulfilled, (state, action) => {
-                state.loading = false;
-                // Adjust response fields to match your API structure.
-                // Common patterns: data, jobs, results, total, total_count
                 const response = action.payload;
-                state.items = response.jobs || response.data || response.results || [];
-                state.totalJobs = response.total || response.total_count || 0;
+                const jobs = response.jobs || response.data || response.results || [];
+                const totalJobs = response.total || response.total_count || 0;
+
+                state.loading = false;
+                state.jobs = jobs;
+                state.totalJobs = totalJobs;
                 state.totalPages = Math.ceil(state.totalJobs / state.params.per_page) || 0;
                 state.error = null;
             })
             .addCase(searchJobs.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || action.error.message || 'An error occurred';
-                state.items = [];
+                state.jobs = [];
             });
     },
 })
@@ -98,21 +104,27 @@ export const searchJobs = createAsyncThunk(
         const params = getState().jobs.params;
 
         const queryParams = {};
-        Object.keys(params).forEach((key) => {
-            const value = params[key];
-            if (value !== '' && value !== null && value !== undefined) {
-                queryParams[key] = value;
-            }
-        });
-        if (!queryParams.page) queryParams.page = 1;
+        if (params.q !== '' && params.q !== null && params.q !== undefined) {
+            queryParams.q = params.q;
+        }
 
-        const url = new URL(API_BASE_URL);
-        Object.keys(queryParams).forEach((key) =>
-            url.searchParams.append(key, queryParams[key])
-        );
+        const url = new globalThis.URL(API_BASE_URL);
+        Object.keys(queryParams).forEach((key) => {
+            url.searchParams.append(key, queryParams[key]);
+        });
+
+        debugJobSearch("Preparing API request", {
+            keyword: queryParams.q || "",
+            url: url.toString(),
+        });
 
         try {
-            const response = await fetch(url.toString(), {
+            debugJobSearch("Calling jobs API", {
+                endpoint: url.toString(),
+                hasApiKey: Boolean(API_KEY),
+            });
+
+            const response = await globalThis.fetch(url.toString(), {
                 headers: {
                     'X-API-Key': API_KEY,
                 },
@@ -123,8 +135,14 @@ export const searchJobs = createAsyncThunk(
             }
 
             const data = await response.json();
+            debugJobSearch("API response received", {
+                ok: response.ok,
+                status: response.status,
+                jobs: data.jobs?.length || data.data?.length || data.results?.length || 0,
+            });
             return data;
         } catch (error) {
+            debugJobSearch("API call threw an error", { error: error.message });
             return rejectWithValue(error.message || 'Failed to fetch jobs');
         }
     }

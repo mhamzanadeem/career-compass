@@ -4,7 +4,6 @@ import {
   setSearchParams,
   resetSearchParams,
   setCurrentPage,
-  searchJobs,
 } from "../redux/features/jobs/jobSlice";
 import { REMOTE_TYPES, EMPLOYMENT_TYPES, SENIORITY_LEVELS } from "../utils/constants";
 
@@ -27,12 +26,14 @@ export default function FilterPanel({ onClose }) {
   const params = useSelector((s) => s.jobs.params);
 
   const apply = (patch) => {
+    globalThis.console.info("[Job Search] Filter updated", patch);
     dispatch(setSearchParams(patch));
+    dispatch(setCurrentPage(1));
   };
 
   const runSearch = () => {
-    dispatch(setCurrentPage(1));
-    dispatch(searchJobs());
+    globalThis.console.info("[Job Search] Applying filters locally from Redux store", params);
+    if (onClose) onClose();
   };
 
   return (
@@ -132,8 +133,9 @@ export default function FilterPanel({ onClose }) {
         </button>
         <button
           onClick={() => {
+            globalThis.console.info("[Job Search] Reset filters requested");
             dispatch(resetSearchParams());
-            dispatch(searchJobs());
+            dispatch(setCurrentPage(1));
           }}
           className="rounded-lg py-2.5 px-4 text-sm font-semibold text-muted border border-line dark:border-slate-700 hover:text-ink dark:hover:text-white hover:border-primary/40 transition-colors"
         >

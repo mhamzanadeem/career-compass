@@ -1,19 +1,14 @@
-import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
-  LuSparkles,
   LuBriefcase,
   LuBuilding2,
   LuGlobe,
-  LuArrowRight,
 } from "react-icons/lu";
 import SearchBar from "../components/SearchBar";
-import JobCard from "../components/JobCard";
-import { JobGridSkeleton } from "../components/Loader";
 import { searchJobs, setSearchParam, setCurrentPage } from "../redux/features/jobs/jobSlice";
-import { POPULAR_TAGS, TRENDING_SKILLS } from "../utils/constants";
+import { POPULAR_TAGS } from "../utils/constants";
 
 const STATS = [
   { label: "Jobs Found", value: "12,400+", icon: LuBriefcase },
@@ -21,31 +16,12 @@ const STATS = [
   { label: "Remote Jobs", value: "68%", icon: LuGlobe },
 ];
 
-const FEATURES = [
-  {
-    title: "AI-Powered Matching",
-    body: "Semantic search surfaces roles that fit your skills, not just your keywords.",
-  },
-  {
-    title: "Verified Companies",
-    body: "Every listing is tied to a real company profile so you know who's hiring.",
-  },
-  {
-    title: "One-Click Save",
-    body: "Bookmark roles as you browse and pick up your search later, anywhere.",
-  },
-];
-
 export default function Home() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { jobs, loading } = useSelector((s) => s.jobs);
-
-  useEffect(() => {
-    dispatch(searchJobs());
-  }, [dispatch]);
 
   const handleTag = (tag) => {
+    globalThis.console.info("[Job Search] Home tag selected", { tag });
     dispatch(setSearchParam({ key: "q", value: tag }));
     dispatch(setCurrentPage(1));
     dispatch(searchJobs());

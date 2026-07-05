@@ -16,6 +16,7 @@ export default function SearchBar({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    globalThis.console.info("[Job Search] User searched a keyword", { keyword: value });
     dispatch(setSearchParam({ key: "q", value }));
     dispatch(setCurrentPage(1));
     dispatch(searchJobs());
