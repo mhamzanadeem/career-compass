@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { LuTrash2, LuMapPin } from "react-icons/lu";
-import { removeJob } from "../redux/features/savedJobs/savedJobsSlice";
+import { removeJob } from "../redux/features/savedjobs/savedJobsSlice";
 import { formatSalary, getInitials } from "../utils/helpers";
 
 export default function SavedJobCard({ job }) {

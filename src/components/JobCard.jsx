@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { LuBookmark, LuMapPin, LuBriefcase } from "react-icons/lu";
-import { saveJob, removeJob } from "../redux/features/savedJobs/savedJobsSlice";
+import { saveJob, removeJob } from "../redux/features/savedjobs/savedJobsSlice";
 import { formatSalary, formatRemoteType, getInitials, classNames } from "../utils/helpers";
 import { timeAgo } from "../utils/formatDate";
 import SkillBadge from "./SkillBadge";

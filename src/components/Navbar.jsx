@@ -68,9 +68,9 @@ export default function Navbar({ onMenuClick }) {
             {theme === "dark" ? <LuSun size={19} /> : <LuMoon size={19} />}
           </button>
 
-          <div className="h-9 w-9 rounded-full bg-grad-primary flex items-center justify-center text-white text-sm font-semibold cursor-pointer">
+          {/* <div className="h-9 w-9 rounded-full bg-grad-primary flex items-center justify-center text-white text-sm font-semibold cursor-pointer">
             AC
-          </div>
+          </div> */}
         </div>
       </div>
     </header>

@@ -1,3 +1,89 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  @apply bg-bg-light text-ink transition-colors duration-300;
+}
+
+html.dark body {
+  @apply bg-bg-dark text-slate-100;
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.25);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-line dark:bg-slate-700 rounded-full;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.card-surface {
+  @apply bg-white dark:bg-bg-card border border-line dark:border-slate-700/60 rounded-xl2 shadow-soft transition-colors duration-300;
+}
+
+.btn-gradient {
+  @apply bg-grad-primary text-white font-semibold shadow-glow-primary transition-transform duration-200 active:scale-[0.97] hover:brightness-110;
+}
+
+.skeleton {
+  @apply relative overflow-hidden bg-line/60 dark:bg-slate-700/50;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

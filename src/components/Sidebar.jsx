@@ -23,8 +23,8 @@ const ITEMS = [
   { label: "Dashboard", path: "/", icon: "LuLayoutDashboard" },
   { label: "Jobs", path: "/jobs", icon: "LuBriefcase" },
   { label: "Saved Jobs", path: "/saved-jobs", icon: "LuBookmark" },
-  { label: "Companies", path: "/companies", icon: "LuBuilding2" },
-  { label: "Settings", path: "/settings", icon: "LuSettings" },
+  // { label: "Companies", path: "/companies", icon: "LuBuilding2" },
+  // { label: "Settings", path: "/settings", icon: "LuSettings" },
 ];
 
 function SidebarLinks({ onNavigate }) {
