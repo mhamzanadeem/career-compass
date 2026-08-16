@@ -6,7 +6,7 @@ import FilterPanel from "../components/FilterPanel";
 import JobCard from "../components/JobCard";
 import Pagination from "../components/Pagination";
 import { JobGridSkeleton } from "../components/Loader";
-import { setCurrentPage } from "../redux/features/jobs/jobSlice";
+import { searchJobs, setCurrentPage } from "../redux/features/jobs/jobSlice";
 
 function normalizeText(value) {
   return String(value || "").trim().toLowerCase();
@@ -73,6 +73,12 @@ export default function Jobs() {
   const currentPage = totalPages > 0 ? Math.min(params.page, totalPages) : 1;
   const startIndex = (currentPage - 1) * pageSize;
   const visibleJobs = filteredJobs.slice(startIndex, startIndex + pageSize);
+
+  useEffect(() => {
+    if (!loading && jobs.length === 0 && !error) {
+      dispatch(searchJobs());
+    }
+  }, [dispatch, loading, jobs.length, error]);
 
   useEffect(() => {
     globalThis.console.info("[Job Search] Frontend is rendering results from Redux store", {
