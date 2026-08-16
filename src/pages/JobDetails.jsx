@@ -99,14 +99,14 @@ export default function JobDetails() {
           >
             <LuBookmark size={18} fill={isSaved ? "currentColor" : "none"} />
           </button>
-          <a
-            href={job.apply_url || "#"}
-            target="_blank"
-            rel="noreferrer"
-            className="btn-gradient rounded-lg px-5 py-2.5 text-sm flex items-center gap-2"
+          <button
+            type="button"
+            disabled
+            aria-disabled="true"
+            className="rounded-lg px-5 py-2.5 text-sm flex items-center gap-2 bg-slate-500 text-slate-200 cursor-not-allowed opacity-80"
           >
             Apply now <LuExternalLink size={15} />
-          </a>
+          </button>
         </div>
       </div>
 
